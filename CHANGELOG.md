@@ -1,3 +1,11 @@
+## 4.9beta 2026-07-28 <code at nfrastack dot com>
+
+   ### Changed
+      - Port to nfrastack/base image
+      - Alpine 3.24
+      - Mysql 9.7.0
+
+
 ## 4.1.100 2026-03-13 <dave at tiredofit dot ca>
 
    ### Changed

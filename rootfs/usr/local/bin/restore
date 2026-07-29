@@ -1,9 +1,12 @@
 #!/command/with-contenv /bin/bash
+# SPDX-FileCopyrightText: © 2026 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
-source /assets/functions/00-container
-source /assets/defaults/10-db-backup
-source /assets/functions/10-db-backup
-PROCESS_NAME="db-backup-restore"
+source /container/base/functions/container/init
+source /container/defaults/10-dbbackup
+source /container/functions/10-dbbackup
+SERVICE_NAME="db-backup-restore"
 
 oldcolumns=$COLUMNS
 
@@ -37,7 +40,7 @@ else
         "-h" )
             cat <<EOF
 ${IMAGE_NAME} Restore Tool ${IMAGE_VERSION}
-(c) 2023 Dave Conroy (https://github.com/tiredofit) (https://www.tiredofit.ca)
+(c) 2026 Nfrastack (https://www.nfrastack.com)
 
 This script will assist you in recovering databases taken by the Docker image.
 You will be presented with a series of menus allowing you to choose:
@@ -991,7 +994,6 @@ EOF
 
 #### SCRIPT START
 trap control_c INT
-bootstrap_variables restore_init
 
 cat << EOF
 

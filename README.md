@@ -1,42 +1,26 @@
-# github.com/tiredofit/docker-db-backup
-
-[![GitHub release](https://img.shields.io/github/v/tag/tiredofit/docker-db-backup?style=flat-square)](https://github.com/tiredofit/docker-db-backup/releases/latest)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/tiredofit/docker-db-backup/main.yml?branch=main&style=flat-square)](https://github.com/tiredofit/docker-db-backup/actions)
-[![Docker Stars](https://img.shields.io/docker/stars/tiredofit/db-backup.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/db-backup/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/tiredofit/db-backup.svg?style=flat-square&logo=docker)](https://hub.docker.com/r/tiredofit/db-backup/)
-[![Become a sponsor](https://img.shields.io/badge/sponsor-tiredofit-181717.svg?logo=github&style=flat-square)](https://www.tiredofit.ca/sponsor)
-[![Paypal Donate](https://img.shields.io/badge/donate-paypal-00457c.svg?logo=paypal&style=flat-square)](https://www.paypal.me/tiredofit)
-
----
+# nfrastack/container-db-backup
 
 ## About
 
->> This is being migrated to the nfrastack/container-db-backup namespace - A new nfrastack release will come in April 2026
+Backup multiple types of database servers on a scheduled basis with many customizable options.
 
-This will build a container for backing up multiple types of DB Servers
-
-Backs up CouchDB, InfluxDB, MySQL/MariaDB, Microsoft SQL, MongoDB, Postgres, Redis servers.
-
-- dump to local filesystem or backup to S3 Compatible services, and Azure.
-- multiple backup job support
-  - selectable when to start the first dump, whether time of day or relative to container start time
-  - selectable interval
-  - selectable omit scheduling during periods of time
-  - selectable database user and password
-  - selectable cleanup and archive capabilities
-  - selectable database name support - all databases, single, or multiple databases
-  - backup all to separate files or one singular file
-- checksum support choose to have an MD5 or SHA1 hash generated after backup for verification
-- compression support (none, gz, bz, xz, zstd)
-- encryption support (passphrase and public key)
-- notify upon job failure to email, matrix, mattermost, rocketchat, custom script
-- zabbix metrics support
-- hooks to execute pre and post backup job for customization purposes
-- companion script to aid in restores
+* CouchDB, InfluxDB, MySQL/MariaDB, Microsoft SQL, MongoDB, Postgres, Redis, SQLite3 support
+* Dump to local filesystem or backup to S3 Compatible services, and Azure
+* Multiple backup job support (DB01, DB02, ... DB99)
+* Flexible scheduling (interval, cron, HHMM, datetime)
+* Blackout periods to skip backups during certain hours
+* Per-job credentials, storage targets, compression, encryption
+* Checksum support (MD5, SHA1)
+* Compression support (none, gzip, bzip2, xz, zstd)
+* GPG encryption (passphrase or public key)
+* Notification on failure (email, Matrix, Mattermost, Rocket.Chat, custom script)
+* Zabbix monitoring metrics
+* Pre/post backup hook scripts
+* Interactive and CLI restore tool
 
 ## Maintainer
 
-- [Dave Conroy](https://github.com/tiredofit)
+- [Nfrastack](https://www.nfrastack.com)
 
 ## Table of Contents
 
@@ -120,31 +104,37 @@ Backs up CouchDB, InfluxDB, MySQL/MariaDB, Microsoft SQL, MongoDB, Postgres, Red
 
 ### Build from Source
 
-Clone this repository and build the image with `docker build <arguments> (imagename) .`
+This image relies on a customized base image in order to work.
+
+```bash
+docker build \
+  --build-arg BASE_IMAGE=ghcr.io/nfrastack/container-base:latest \
+  -t container-db-backup:test \
+  .
+```
 
 ### Prebuilt Images
 
-Builds of the image are available on [Docker Hub](https://hub.docker.com/r/tiredofit/db-backup)
+Feature limited builds of the image are available on the [Github Container Registry](https://github.com/nfrastack/container-db-backup/pkgs/container/container-db-backup) and [Docker Hub](https://hub.docker.com/r/nfrastack/db-backup).
 
-Builds of the image are also available on the [Github Container Registry](https://github.com/tiredofit/docker-db-backup/pkgs/container/docker-db-backup)
+To unlock advanced features, one must provide a code to be able to change specific environment variables from defaults. Support the development to gain access to a code.
 
-```bash
-docker pull ghcr.io/tiredofit/docker-db-backup:(imagetag)
+To get access to the image use your container orchestrator to pull from the following locations:
+
+```
+ghcr.io/nfrastack/container-db-backup:(image_tag)
+docker.io/nfrastack/db-backup:(image_tag)
 ```
 
-The following image tags are available along with their tagged release based on what's written in the [Changelog](CHANGELOG.md):
+The following image tags are available:
 
-| Alpine Base | Tag       |
-| ----------- | --------- |
-| latest      | `:latest` |
-
-```bash
-docker pull docker.io/tiredofit/db-backup:(imagetag)
-```
+| Base      | Tag       |
+| --------- | --------- |
+| Alpine    | `:latest` |
 
 #### Multi Architecture
 
-Images are built primarily for `amd64` architecture, and may also include builds for `arm/v7`, `arm64` and others. These variants are all unsupported. Consider [sponsoring](https://www.tiredofit.ca/sponsor) my work so that I can work with various hardware. To see if this image supports multiple architectures, type `docker manifest (image):(tag)`
+Images are built for `amd64` by default, with optional support for `arm64` and other architectures.
 
 ## Configuration
 
@@ -169,13 +159,16 @@ The following directories are used for configuration and can be mapped for persi
 
 #### Base Images used
 
-This image relies on an [Alpine Linux](https://hub.docker.com/r/tiredofit/alpine) base image that relies on an [init system](https://github.com/just-containers/s6-overlay) for added capabilities. Outgoing SMTP capabilities are handled via `msmtp`. Individual container performance monitoring is performed by [zabbix-agent](https://zabbix.org). Additional tools include: `bash`,`curl`,`less`,`logrotate`, `nano`.
-
+This image relies on a customized base image in order to work.
 Be sure to view the following repositories to understand all the customizable options:
 
-| Image                                                  | Description                            |
-| ------------------------------------------------------ | -------------------------------------- |
-| [OS Base](https://github.com/tiredofit/docker-alpine/) | Customized Image based on Alpine Linux |
+| Image                                                   | Description |
+| ------------------------------------------------------- | ----------- |
+| [OS Base](https://github.com/nfrastack/container-base/) | Base Image  |
+
+Below is the complete list of available options that can be used to customize your installation.
+
+- Variables showing an `x` under the `Adv.` column can only be set if the containers advanced functionality is enabled.
 
 #### Container Options
 
@@ -446,15 +439,15 @@ If for some reason your filesystem or host is not detecting it right, use the en
 #### Job Backup Options
 
 If `DEFAULT_` variables are set and you do not wish for the settings to carry over into your jobs, you can set the appropriate environment variable with the value of `unset`.
-Otherwise, override them per backup job. Additional backup jobs can be scheduled by using `DB02_`,`DB03_`,`DB04_` ... prefixes. See [Specific Database Options](#specific-database-options) which may overrule this list.
+Otherwise, override them per backup job. Additional backup jobs can be scheduled by using `DB02_`,`DB03_`,`DB04_` ... prefixes. A limit of 3 can be created when not in advanced mode. See [Specific Database Options](#specific-database-options) which may overrule this list.
 
-| Parameter   | Description                                                                                    | Default | `_FILE` |
-| ----------- | ---------------------------------------------------------------------------------------------- | ------- | ------- |
-| `DB01_TYPE` | Type of DB Server to backup `couch` `influx` `mysql` `mssql` `pgsql` `mongo` `redis` `sqlite3` |         |         |
-| `DB01_HOST` | Server Hostname e.g. `mariadb`. For `sqlite3`, full path to DB file e.g. `/backup/db.sqlite3`  |         | x       |
-| `DB01_NAME` | Schema Name e.g. `database`                                                                    |         | x       |
-| `DB01_USER` | username for the database(s) - Can use `root` for MySQL                                        |         | x       |
-| `DB01_PASS` | (optional if DB doesn't require it) password for the database                                  |         | x       |
+| Parameter   | Description                                                                                    | Default | `_FILE` | Adv. |
+| ----------- | ---------------------------------------------------------------------------------------------- | ------- | ------- | ---- |
+| `DB01_TYPE` | Type of DB Server to backup `couch` `influx` `mysql` `mssql` `pgsql` `mongo` `redis` `sqlite3` |         |         |      |
+| `DB01_HOST` | Server Hostname e.g. `mariadb`. For `sqlite3`, full path to DB file e.g. `/backup/db.sqlite3`  |         | x       |      |
+| `DB01_NAME` | Schema Name e.g. `database`                                                                    |         | x       |      |
+| `DB01_USER` | username for the database(s) - Can use `root` for MySQL                                        |         | x       |      |
+| `DB01_PASS` | (optional if DB doesn't require it) password for the database                                  |         | x       |      | |
 
 
 | Variable                       | Description                                                                                               | Default      |
@@ -811,7 +804,7 @@ docker exec -it (whatever your container name is) bash
 
 Manual Backups can be performed by entering the container and typing `backup-now`. This will execute all the backup tasks that are scheduled by means of the `BACKUPXX_` variables. Alternatively if you wanted to execute a job on its own you could simply type `backup01-now` (or whatever your number would be). There is no concurrency, and jobs will be executed sequentially.
 
-- Recently there was a request to have the container work with Kubernetes cron scheduling. This can theoretically be accomplished by setting the container `MODE=MANUAL` and then setting `MANUAL_RUN_FOREVER=FALSE` - You would also want to disable a few features from the upstream base images specifically `CONTAINER_ENABLE_SCHEDULING` and `CONTAINER_ENABLE_MONITORING`. This should allow the container to start, execute a backup by executing and then exit cleanly. An alternative way to running the script is to execute `/etc/services.available/10-db-backup/run`.
+- For Kubernetes CronJob usage: set `MODE=MANUAL` and `MANUAL_RUN_FOREVER=FALSE`. Disable `CONTAINER_ENABLE_SCHEDULING`. The container will start, execute a backup, and exit cleanly.
 
 ### Restoring Databases
 
